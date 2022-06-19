@@ -30,7 +30,7 @@ def is_prime(n):
             continue
     return True
 
-def filter_numbers(**nums, fltr):
+def filter_numbers(nums, fltr):
     """
     функция, которая на вход принимает список из целых чисел,
     и возвращает только чётные/нечётные/простые числа
