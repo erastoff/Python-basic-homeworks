@@ -3,7 +3,6 @@
 Функции и структуры данных
 """
 
-
 def power_numbers(*args):
     """
     функция, которая принимает N целых чисел,
@@ -12,7 +11,6 @@ def power_numbers(*args):
     <<< [1, 4, 25, 49]
     """
     return [item ** 2 for item in args]
-
 
 # filter types
 ODD = "odd"
@@ -52,4 +50,3 @@ def filter_numbers(nums, fltr):
     else:
         print('Unexpected filter!')
         return None
-
