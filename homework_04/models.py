@@ -7,10 +7,63 @@
 для модели Post обязательными являются user_id, title, body
 создайте связи relationship между моделями: User.posts и Post.user
 """
-
+import asyncio
 import os
 
-PG_CONN_URI = os.environ.get("SQLALCHEMY_PG_CONN_URI") or "postgresql+asyncpg://postgres:password@localhost/postgres"
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    AsyncEngine,
+    create_async_engine,
+    async_scoped_session,
+)
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, declared_attr
 
-Base = None
-Session = None
+PG_CONN_URL = (
+    os.environ.get("SQLALCHEMY_PG_CONN_URI")
+    or "postgresql+asyncpg://postgres:password@localhost/homework_04"
+)
+
+
+class Base:
+    @declared_attr
+    def __tablename__(cls):
+        return f"{cls.__name__.lower()}s"
+
+    id = Column(Integer, primary_key=True)
+
+    def __repr__(self):
+        return str(self)
+
+
+Base = declarative_base(cls=Base)
+
+
+class User(Base):
+    name = Column(String(50))
+    username = Column(String(20), unique=True)
+    email = Column(String(50), unique=True)
+
+    posts = relationship("Post", back_populates="user", uselist=True)
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id}, name={self.name}, username={self.username!r})"
+
+
+class Post(Base):
+    title = Column(String(200), unique=False, nullable=False)
+    body = Column(Text, nullable=False, default="N/A")
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    user = relationship("User", back_populates="posts")
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id}, title={self.title!r}, author_id={self.user_id})"
+
+
+async_engine: AsyncEngine = create_async_engine(
+    PG_CONN_URL,
+    echo=False,
+)
+async_session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
+Session = async_scoped_session(async_session, scopefunc=asyncio.current_task)
