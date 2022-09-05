@@ -26,6 +26,11 @@ PG_CONN_URL = (
 
 
 class Base:
+    """
+    Parent class for all database element.
+    declarative_base(cls=Base) from sqlalchemy.orm is applied below to define this class as base.
+    """
+
     @declared_attr
     def __tablename__(cls):
         return f"{cls.__name__.lower()}s"
@@ -40,6 +45,12 @@ Base = declarative_base(cls=Base)
 
 
 class User(Base):
+    """
+    Class 'User':
+    Post.user relationship specified. Parameter uselist=true shows the possibility of the existence
+    of several posts by one author (user).
+    """
+
     name = Column(String(50))
     username = Column(String(20), unique=True)
     email = Column(String(50), unique=True)
@@ -51,6 +62,11 @@ class User(Base):
 
 
 class Post(Base):
+    """
+    Class 'Post':
+    User.posts relationship spicified.
+    """
+
     title = Column(String(200), unique=False, nullable=False)
     body = Column(Text, nullable=False, default="N/A")
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -61,6 +77,7 @@ class Post(Base):
         return f"{self.__class__.__name__}(id={self.id}, title={self.title!r}, author_id={self.user_id})"
 
 
+#  Engine and session creation
 async_engine: AsyncEngine = create_async_engine(
     PG_CONN_URL,
     echo=False,
