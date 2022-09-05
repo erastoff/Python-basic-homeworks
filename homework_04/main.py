@@ -14,17 +14,23 @@
 """
 import asyncio
 
-# from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.engine import Result
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import async_engine, async_session, Base, User, Post
-from jsonplaceholder_requests import fetch_users_data, fetch_posts_data
+from jsonplaceholder_requests import (
+    USERS_DATA_URL,
+    POSTS_DATA_URL,
+    fetch_users_data,
+    fetch_posts_data,
+)
 
 
 async def create_tables():
+    """
+    Function to delete/create all tables in DB (tables which corresponds the metadata of base class).
+    """
     async with async_engine.begin() as conn:
         # print("todo: drop all")
         await conn.run_sync(Base.metadata.drop_all)
@@ -32,18 +38,23 @@ async def create_tables():
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def fetch_all_data() -> (list[dict], list[dict]):
+async def fetch_all_data(
+    users_url: str = USERS_DATA_URL,
+    posts_url: str = POSTS_DATA_URL,
+) -> (list[dict], list[dict]):
+    """
+    Function to get all data from sources.
+    """
     users_data, posts_data = await asyncio.gather(
-        fetch_users_data(), fetch_posts_data()
+        fetch_users_data(users_url), fetch_posts_data(posts_url)
     )
-    # print("type users_data: ", type(users_data))
-    # print("len users_data: ", len(users_data))
-    # print("type posts_data: ", type(posts_data))
-    # print("len posts_data: ", len(posts_data))
     return users_data, posts_data
 
 
 async def data_upload(session: AsyncSession):
+    """
+    Function to upload data into database.
+    """
     users_data, posts_data = await fetch_all_data()
 
     users = [
@@ -62,6 +73,9 @@ async def data_upload(session: AsyncSession):
 
 
 async def get_posts_by_user_id(session: AsyncSession, user_id: int) -> list[Post]:
+    """
+    Checking the Post.user relationship.
+    """
     statement = select(Post).join(Post.user).where(User.id == user_id)
     result: Result = await session.execute(statement)
 
@@ -73,6 +87,9 @@ async def get_posts_by_user_id(session: AsyncSession, user_id: int) -> list[Post
 
 
 async def get_user_by_post(session: AsyncSession, post_title: str) -> User:
+    """
+    Checking the User.posts relationship.
+    """
     statement = select(User).join(User.posts).where(Post.title == post_title)
     result: Result = await session.execute(statement)
 
@@ -85,7 +102,6 @@ async def get_user_by_post(session: AsyncSession, post_title: str) -> User:
 
 
 async def async_main():
-    # logger.info("Starting main")
     await create_tables()
 
     async with async_session() as session:
@@ -93,11 +109,6 @@ async def async_main():
         await get_posts_by_user_id(session, 10)
         await get_user_by_post(session, "qui expl")
         await get_user_by_post(session, "magnam ut rerum iure")
-    # logger.info("Finish main")
-
-
-# def main():
-#     pass
 
 
 if __name__ == "__main__":
