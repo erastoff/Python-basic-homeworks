@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, url_for, redirect, flash
 
 from models import db, Item
-from views.forms.products import CreateItemForm
+from views.forms.items import CreateItemForm
 
 print("__name__", __name__)
 items_app = Blueprint("items_app", __name__)  # аналог APIRouter в FastAPI
