@@ -41,12 +41,14 @@ def filter_numbers(nums, fltr):
     >>> filter_numbers([2, 3, 4, 5], EVEN)
     <<< [2, 4]
     """
-    if fltr == 'odd':
+    if fltr == ODD:
         return list(filter(lambda x: x % 2 != 0, nums))
-    elif fltr == 'even':
+    elif fltr == EVEN:
         return list(filter(lambda x: x % 2 == 0, nums))
-    elif fltr == 'prime':
+    elif fltr == PRIME:
         return list(filter(is_prime, nums))
     else:
         print('Unexpected filter!')
         return None
+
+    #check the repository transition into ubuntu
